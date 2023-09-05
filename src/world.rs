@@ -75,10 +75,6 @@ impl World {
         self.empty_slot = Some(entity);
         self.components[entity] = None;
     }
-
-    pub fn get_entities(&self) -> std::ops::Range<EntityId> {
-        0..self.max_slot
-    }
 }
 
 // component operations
@@ -144,13 +140,11 @@ impl World {
 // query operations
 impl World {
     pub fn query_components<Q: Query>(&self) -> impl Iterator<Item = <Q>::Output<'_>> {
-        self.get_entities()
-            .filter_map(|e| self.get_components::<Q>(e))
+        (0..self.max_slot).filter_map(|e| self.get_components::<Q>(e))
     }
 
     pub fn query_components_mut<Q: Query>(&self) -> impl Iterator<Item = <Q>::OutputMut<'_>> {
-        self.get_entities()
-            .filter_map(|e| self.get_components_mut::<Q>(e))
+        (0..self.max_slot).filter_map(|e| self.get_components_mut::<Q>(e))
     }
 
     pub fn query_single<Q: Query>(&self) -> Option<<Q>::Output<'_>> {
