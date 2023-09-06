@@ -3,7 +3,9 @@ use crate::components::{Component, Query};
 use crate::resources::Resource;
 use std::any::{Any, TypeId};
 use std::cell::{Ref, RefCell, RefMut};
-use std::collections::HashMap;
+use std::collections::HashMap;  
+// add entity bus, discord 9/5/23 at 11:00pm
+// maybe try commands?
 
 pub type EntityId = usize;
 type ComponentMap = HashMap<TypeId, RefCell<Box<dyn Any>>>;
@@ -14,6 +16,7 @@ pub struct World {
     components: Vec<Option<ComponentMap>>,
     empty_slot: Option<usize>,
     resources: ComponentMap,
+    entity_queue: RefCell<Vec<ComponentMap>>,
 }
 
 pub struct Entity(EntityId);
@@ -29,14 +32,6 @@ impl Entity {
 impl World {
     fn valid_entity(&self, entity: EntityId) -> bool {
         self.components[entity].is_some()
-    }
-
-    pub fn next_slot(&self) -> EntityId {
-        if let Some(slot) = self.empty_slot {
-            slot
-        } else {
-            self.max_slot
-        }
     }
 
     pub fn new_entity(&mut self) -> EntityId {
@@ -69,6 +64,21 @@ impl World {
 
     pub fn new_entities(&mut self, count: usize) -> impl Iterator<Item = EntityId> + '_ {
         (0..count).map(|_| self.new_entity())
+    }
+}
+
+// queue operations
+impl World {
+    pub fn queue_entity(&self) -> EntityId {
+        0
+    }
+
+    pub fn queue_add_component<T: Component + 'static>(&self, entity: EntityId, component: T) {
+
+    }
+
+    pub fn queue_remove_component<T: Component + 'static>(&mut self, entity: EntityId) {
+
     }
 }
 

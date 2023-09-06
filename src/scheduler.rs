@@ -9,7 +9,6 @@ pub struct Scheduler {
 
 impl Scheduler {
     pub fn run_startup_systems(&mut self, world: &mut World) -> bool {
-        //self.startup_systems.iter_mut().any(|system| system.run(world))
         for system in self.startup_systems.iter_mut() {
             if !system.run(world) {
                 return false;
@@ -19,7 +18,6 @@ impl Scheduler {
     }
 
     pub fn run_systems(&mut self, world: &mut World) -> bool{
-        //self.systems.iter_mut().any(|system| system.run(world))
         for system in self.systems.iter_mut() {
             if !system.run(world) {
                 return false;
