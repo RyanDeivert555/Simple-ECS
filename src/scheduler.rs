@@ -1,4 +1,4 @@
-use crate::systems::{System, StartUpSystem};
+use crate::systems::{StartUpSystem, System};
 use crate::world::World;
 
 #[derive(Default)]
@@ -17,7 +17,7 @@ impl Scheduler {
         true
     }
 
-    pub fn run_systems(&mut self, world: &mut World) -> bool{
+    pub fn run_systems(&mut self, world: &mut World) -> bool {
         for system in self.systems.iter_mut() {
             if !system.run(world) {
                 return false;
