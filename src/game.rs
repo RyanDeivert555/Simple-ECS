@@ -19,7 +19,7 @@ impl StartUpSystem for Setup {
             .size(800, 600)
             .title("Benchmark Test")
             .build();
-        
+
         world.add_resource(rl);
         world.add_resource(thread);
         world.add_resource(Counter(0));
@@ -67,7 +67,7 @@ impl System for AddSquaresSystem {
             let rl = world.get_resource::<RaylibHandle>().unwrap();
             (
                 rl.is_mouse_button_pressed(MouseButton::MOUSE_LEFT_BUTTON),
-                rl.is_mouse_button_pressed(MouseButton::MOUSE_RIGHT_BUTTON)
+                rl.is_mouse_button_pressed(MouseButton::MOUSE_RIGHT_BUTTON),
             )
         };
         let square_count = 100usize;
@@ -79,6 +79,7 @@ impl System for AddSquaresSystem {
             let mut counter = world.get_resource_mut::<Counter>().unwrap();
             counter.0 += square_count;
         }
+
         // if right_mouse_down {
         //     let entities = world.query_components::<(Entity,)>();
         //     for (entity,) in entities {

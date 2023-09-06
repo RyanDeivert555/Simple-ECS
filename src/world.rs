@@ -3,7 +3,7 @@ use crate::components::{Component, Query};
 use crate::resources::Resource;
 use std::any::{Any, TypeId};
 use std::cell::{Ref, RefCell, RefMut};
-use std::collections::HashMap;  
+use std::collections::HashMap;
 // add entity bus, discord 9/5/23 at 11:00pm
 // maybe try commands?
 
@@ -14,9 +14,7 @@ type ComponentMap = HashMap<TypeId, RefCell<Box<dyn Any>>>;
 pub struct World {
     max_slot: usize,
     components: Vec<Option<ComponentMap>>,
-    empty_slot: Option<usize>,
     resources: ComponentMap,
-    entity_queue: RefCell<Vec<ComponentMap>>,
 }
 
 pub struct Entity(EntityId);
@@ -34,51 +32,36 @@ impl World {
         self.components[entity].is_some()
     }
 
+    fn find_next_slot(&self) -> EntityId {
+        self.components
+            .iter()
+            .position(|c| c.is_none())
+            .unwrap_or(self.max_slot)
+    }
+
     pub fn new_entity(&mut self) -> EntityId {
-        if let Some(slot) = self.empty_slot {
-            self.components[slot] = Some(HashMap::new());
-            self.empty_slot = None;
-            self.add_component(slot, Entity(slot));
-            slot
-        } else {
-            let id = self.max_slot;
+        let slot = self.find_next_slot();
+        if slot == self.components.len() {
             self.components.push(Some(HashMap::new()));
             self.max_slot += 1;
-            self.add_component(id, Entity(id));
-            id
+        } else {
+            self.components[slot] = Some(HashMap::new());
         }
+        self.add_component(slot, Entity(slot));
+        slot
     }
 
     pub fn remove_entity(&mut self, entity: EntityId) {
-        // multiple removes might skip a slot
         assert!(entity < self.max_slot, "Invalid entity id");
-        self.empty_slot = Some(entity);
         self.components[entity] = None;
     }
 
-    pub fn available_slots(&self, count: usize) -> impl Iterator<Item = EntityId> + '_ {
-        (0..self.max_slot)
-            .filter(|e| self.valid_entity(*e))
-            .take(count)
+    pub fn available_slots(&self) -> impl Iterator<Item = EntityId> + '_ {
+        (0..self.max_slot).filter(|e| self.valid_entity(*e))
     }
 
     pub fn new_entities(&mut self, count: usize) -> impl Iterator<Item = EntityId> + '_ {
         (0..count).map(|_| self.new_entity())
-    }
-}
-
-// queue operations
-impl World {
-    pub fn queue_entity(&self) -> EntityId {
-        0
-    }
-
-    pub fn queue_add_component<T: Component + 'static>(&self, entity: EntityId, component: T) {
-
-    }
-
-    pub fn queue_remove_component<T: Component + 'static>(&mut self, entity: EntityId) {
-
     }
 }
 
