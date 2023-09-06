@@ -1,6 +1,9 @@
-use crate::operations::OperationStack;
 use crate::world::World;
 
+pub trait StartUpSystem {
+    fn run(&mut self, world: &mut World) -> bool;
+}
+
 pub trait System {
-    fn run(&self, world: &World, operation_stack: &mut OperationStack);
+    fn run(&mut self, world: &mut World) -> bool;
 }

@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 use crate::components::{Component, Query};
-use crate::operations::OperationStack;
 use crate::resources::Resource;
-use crate::systems::System;
 use std::any::{Any, TypeId};
 use std::cell::{Ref, RefCell, RefMut};
 use std::collections::HashMap;
@@ -16,8 +14,6 @@ pub struct World {
     components: Vec<Option<ComponentMap>>,
     empty_slot: Option<usize>,
     resources: ComponentMap,
-    systems: Vec<Box<dyn System>>,
-    run: bool,
 }
 
 pub struct Entity(EntityId);
@@ -31,17 +27,6 @@ impl Entity {
 
 // entity operations
 impl World {
-    pub fn new() -> Self {
-        Self {
-            max_slot: 0,
-            components: Vec::new(),
-            empty_slot: None,
-            resources: HashMap::new(),
-            systems: Vec::new(),
-            run: true,
-        }
-    }
-
     fn valid_entity(&self, entity: EntityId) -> bool {
         self.components[entity].is_some()
     }
@@ -74,6 +59,16 @@ impl World {
         assert!(entity < self.max_slot, "Invalid entity id");
         self.empty_slot = Some(entity);
         self.components[entity] = None;
+    }
+
+    pub fn available_slots(&self, count: usize) -> impl Iterator<Item = EntityId> + '_ {
+        (0..self.max_slot)
+            .filter(|e| self.valid_entity(*e))
+            .take(count)
+    }
+
+    pub fn new_entities(&mut self, count: usize) -> impl Iterator<Item = EntityId> + '_ {
+        (0..count).map(|_| self.new_entity())
     }
 }
 
@@ -184,39 +179,5 @@ impl World {
             self.resources.get(&TypeId::of::<T>())?.borrow_mut(),
             |b| (**b).downcast_mut::<T>().unwrap(),
         ))
-    }
-}
-
-// system operations
-impl World {
-    pub fn add_system(&mut self, system: impl System + 'static) {
-        self.systems.push(Box::new(system));
-    }
-
-    fn update_systems(&self, operation_stack: &mut OperationStack) {
-        for system in self.systems.iter() {
-            system.run(self, operation_stack);
-        }
-    }
-}
-
-// operation stack operations
-impl World {
-    fn update_operations(&mut self, operation_stack: &mut OperationStack) {
-        operation_stack.update_operations(self);
-    }
-}
-
-// run operations
-impl World {
-    pub fn stop_run(&mut self) {
-        self.run = false;
-    }
-
-    pub fn run(&mut self, operation_stack: &mut OperationStack) {
-        while self.run {
-            self.update_operations(operation_stack);
-            self.update_systems(operation_stack);
-        }
     }
 }
