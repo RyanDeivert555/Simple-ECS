@@ -13,7 +13,7 @@ type ComponentMap = HashMap<TypeId, RefCell<Box<dyn Any>>>;
 #[derive(Default)]
 pub struct World {
     max_slot: usize,
-    components: Vec<Option<ComponentMap>>,
+    entities: Vec<Option<ComponentMap>>,
     resources: ComponentMap,
 }
 
@@ -29,11 +29,11 @@ impl Entity {
 // entity operations
 impl World {
     fn valid_entity(&self, entity: EntityId) -> bool {
-        self.components[entity].is_some()
+        self.entities[entity].is_some()
     }
 
     fn find_next_slot(&self) -> EntityId {
-        self.components
+        self.entities
             .iter()
             .position(|c| c.is_none())
             .unwrap_or(self.max_slot)
@@ -41,11 +41,11 @@ impl World {
 
     pub fn new_entity(&mut self) -> EntityId {
         let slot = self.find_next_slot();
-        if slot == self.components.len() {
-            self.components.push(Some(HashMap::new()));
+        if slot == self.entities.len() {
+            self.entities.push(Some(HashMap::new()));
             self.max_slot += 1;
         } else {
-            self.components[slot] = Some(HashMap::new());
+            self.entities[slot] = Some(HashMap::new());
         }
         self.add_component(slot, Entity(slot));
         slot
@@ -53,7 +53,7 @@ impl World {
 
     pub fn remove_entity(&mut self, entity: EntityId) {
         assert!(entity < self.max_slot, "Invalid entity id");
-        self.components[entity] = None;
+        self.entities[entity] = None;
     }
 
     pub fn available_slots(&self) -> impl Iterator<Item = EntityId> + '_ {
@@ -70,7 +70,7 @@ impl World {
     pub fn add_component<T: Component + 'static>(&mut self, entity: EntityId, component: T) {
         assert!(entity < self.max_slot, "Invalid entity id");
         assert!(self.valid_entity(entity), "Entity does not exist");
-        if let Some(component_map) = self.components[entity].as_mut() {
+        if let Some(component_map) = self.entities[entity].as_mut() {
             component_map.insert(TypeId::of::<T>(), RefCell::new(Box::new(component)));
         }
     }
@@ -78,14 +78,14 @@ impl World {
     pub fn remove_component<T: Component + 'static>(&mut self, entity: EntityId) {
         assert!(entity < self.max_slot, "Invalid entity id");
         assert!(self.valid_entity(entity), "Entity does not exist");
-        if let Some(component_map) = self.components[entity].as_mut() {
+        if let Some(component_map) = self.entities[entity].as_mut() {
             component_map.remove(&TypeId::of::<T>());
         }
     }
 
     pub fn get_component<T: Component + 'static>(&self, entity: EntityId) -> Option<Ref<'_, T>> {
         Some(Ref::map(
-            self.components[entity]
+            self.entities[entity]
                 .as_ref()?
                 .get(&TypeId::of::<T>())?
                 .borrow(),
@@ -98,7 +98,7 @@ impl World {
         entity: EntityId,
     ) -> Option<RefMut<'_, T>> {
         Some(RefMut::map(
-            self.components[entity]
+            self.entities[entity]
                 .as_ref()?
                 .get(&TypeId::of::<T>())?
                 .borrow_mut(),
