@@ -1,6 +1,6 @@
-use crate::world::World;
-use crate::systems::{System, StartUpSystem};
 use crate::scheduler::Scheduler;
+use crate::systems::{StartUpSystem, System};
+use crate::world::World;
 
 #[derive(Default)]
 pub struct App {
