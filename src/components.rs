@@ -1,4 +1,4 @@
-use crate::world::EntityId;
+use crate::entities::EntityId;
 use crate::world::World;
 
 pub trait Component {}
@@ -22,7 +22,7 @@ macro_rules! __impl_query {
             type Output<'lt> = ($(::core::cell::Ref<'lt, $generic_type>,)*);
             type OutputMut<'lt> = ($(::core::cell::RefMut<'lt, $generic_type>,)*);
 
-            fn query_components(world: &$crate::world::World, entity: $crate::world::EntityId) -> Option<Self::Output<'_>> {
+            fn query_components(world: &$crate::world::World, entity: $crate::entities::EntityId) -> Option<Self::Output<'_>> {
                 Some(
                     (
                         $(world.get_component::<$generic_type>(entity)?, )*
@@ -30,7 +30,7 @@ macro_rules! __impl_query {
                 )
             }
 
-            fn query_components_mut(world: &$crate::world::World, entity: $crate::world::EntityId) -> Option<Self::OutputMut<'_>> {
+            fn query_components_mut(world: &$crate::world::World, entity: $crate::entities::EntityId) -> Option<Self::OutputMut<'_>> {
                 Some(
                     (
                         $(world.get_component_mut::<$generic_type>(entity)?, )*

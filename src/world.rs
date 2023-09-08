@@ -1,92 +1,57 @@
 #![allow(dead_code)]
 use crate::components::{Component, Query};
+use crate::entities::{ComponentMap, Entities, EntityId};
 use crate::resources::Resource;
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::cell::{Ref, RefCell, RefMut};
-use std::collections::HashMap;
-// add entity bus, discord 9/5/23 at 11:00pm
-// maybe try commands?
-
-pub type EntityId = usize;
-type ComponentMap = HashMap<TypeId, RefCell<Box<dyn Any>>>;
 
 #[derive(Default)]
 pub struct World {
-    max_slot: usize,
-    entities: Vec<Option<ComponentMap>>,
+    entities: Entities,
     resources: ComponentMap,
-}
-
-pub struct Entity(EntityId);
-impl Component for Entity {}
-
-impl Entity {
-    pub fn id(&self) -> EntityId {
-        self.0
-    }
 }
 
 // entity operations
 impl World {
     fn valid_entity(&self, entity: EntityId) -> bool {
-        self.entities[entity].is_some()
+        self.entities.valid_entity(entity)
     }
 
-    fn find_next_slot(&self) -> EntityId {
-        self.entities
-            .iter()
-            .position(|c| c.is_none())
-            .unwrap_or(self.max_slot)
+    fn next_slot(&self) -> EntityId {
+        self.entities.next_slot()
     }
 
     pub fn new_entity(&mut self) -> EntityId {
-        let slot = self.find_next_slot();
-        if slot == self.entities.len() {
-            self.entities.push(Some(HashMap::new()));
-            self.max_slot += 1;
-        } else {
-            self.entities[slot] = Some(HashMap::new());
-        }
-        self.add_component(slot, Entity(slot));
-        slot
+        self.entities.new_entity()
     }
 
     pub fn remove_entity(&mut self, entity: EntityId) {
-        assert!(entity < self.max_slot, "Invalid entity id");
-        self.entities[entity] = None;
+        self.entities.remove_entity(entity);
     }
 
     pub fn available_slots(&self) -> impl Iterator<Item = EntityId> + '_ {
-        (0..self.max_slot).filter(|e| self.valid_entity(*e))
+        self.entities.available_slots()
     }
 
     pub fn new_entities(&mut self, count: usize) -> impl Iterator<Item = EntityId> + '_ {
-        (0..count).map(|_| self.new_entity())
+        self.entities.new_entities(count)
     }
 }
 
 // component operations
 impl World {
     pub fn add_component<T: Component + 'static>(&mut self, entity: EntityId, component: T) {
-        assert!(entity < self.max_slot, "Invalid entity id");
-        assert!(self.valid_entity(entity), "Entity does not exist");
-        if let Some(component_map) = self.entities[entity].as_mut() {
-            component_map.insert(TypeId::of::<T>(), RefCell::new(Box::new(component)));
-        }
+        self.entities.add_component(entity, component);
     }
 
     pub fn remove_component<T: Component + 'static>(&mut self, entity: EntityId) {
-        assert!(entity < self.max_slot, "Invalid entity id");
-        assert!(self.valid_entity(entity), "Entity does not exist");
-        if let Some(component_map) = self.entities[entity].as_mut() {
-            component_map.remove(&TypeId::of::<T>());
-        }
+        self.entities.remove_component::<T>(entity);
     }
 
     pub fn get_component<T: Component + 'static>(&self, entity: EntityId) -> Option<Ref<'_, T>> {
         Some(Ref::map(
-            self.entities[entity]
-                .as_ref()?
+            self.entities
+                .component_map(entity)?
                 .get(&TypeId::of::<T>())?
                 .borrow(),
             |b| (**b).downcast_ref::<T>().unwrap(),
@@ -98,8 +63,8 @@ impl World {
         entity: EntityId,
     ) -> Option<RefMut<'_, T>> {
         Some(RefMut::map(
-            self.entities[entity]
-                .as_ref()?
+            self.entities
+                .component_map(entity)?
                 .get(&TypeId::of::<T>())?
                 .borrow_mut(),
             |b| (**b).downcast_mut::<T>().unwrap(),
@@ -108,7 +73,7 @@ impl World {
 
     pub fn get_components<Q: Query>(&self, entity: EntityId) -> Option<<Q>::Output<'_>> {
         // check to prevent expensive call
-        if entity < self.max_slot && self.valid_entity(entity) {
+        if self.valid_entity(entity) {
             <Q>::query_components(self, entity)
         } else {
             None
@@ -117,7 +82,7 @@ impl World {
 
     pub fn get_components_mut<Q: Query>(&self, entity: EntityId) -> Option<<Q>::OutputMut<'_>> {
         // check to prevent expensive call
-        if entity < self.max_slot && self.valid_entity(entity) {
+        if self.valid_entity(entity) {
             <Q>::query_components_mut(self, entity)
         } else {
             None
@@ -128,11 +93,11 @@ impl World {
 // query operations
 impl World {
     pub fn query_components<Q: Query>(&self) -> impl Iterator<Item = <Q>::Output<'_>> {
-        (0..self.max_slot).filter_map(|e| self.get_components::<Q>(e))
+        self.entities.entities().filter_map(|e| self.get_components::<Q>(e))
     }
 
     pub fn query_components_mut<Q: Query>(&self) -> impl Iterator<Item = <Q>::OutputMut<'_>> {
-        (0..self.max_slot).filter_map(|e| self.get_components_mut::<Q>(e))
+        self.entities.entities().filter_map(|e| self.get_components_mut::<Q>(e))
     }
 
     pub fn query_single<Q: Query>(&self) -> Option<<Q>::Output<'_>> {
