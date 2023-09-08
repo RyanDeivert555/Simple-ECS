@@ -100,11 +100,15 @@ impl World {
     }
 
     pub fn query_components<Q: Query>(&self) -> impl Iterator<Item = <Q>::Output<'_>> {
-        self.entities.entities().filter_map(|e| self.get_components::<Q>(e))
+        self.entities
+            .entities()
+            .filter_map(|e| self.get_components::<Q>(e))
     }
 
     pub fn query_components_mut<Q: Query>(&self) -> impl Iterator<Item = <Q>::OutputMut<'_>> {
-        self.entities.entities().filter_map(|e| self.get_components_mut::<Q>(e))
+        self.entities
+            .entities()
+            .filter_map(|e| self.get_components_mut::<Q>(e))
     }
 
     pub fn query_single<Q: Query>(&self) -> Option<<Q>::Output<'_>> {

@@ -1,6 +1,6 @@
 #![allow(dead_code)]
-use crate::world::World;
 use crate::resources::Resource;
+use crate::world::World;
 
 type WorldFn = dyn FnMut(&mut World);
 
