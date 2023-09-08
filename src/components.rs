@@ -13,14 +13,15 @@ pub trait Query {
 
 impl<T: Component + 'static> Query for T {
     type Output<'lt> = Ref<'lt, T>;
+    type OutputMut<'lt> = RefMut<'lt, T>;
+
     fn query_components(world: &World, entity: EntityId) -> Option<Self::Output<'_>> {
        world.get_component::<T>(entity)
     }
-    type OutputMut<'lt> = RefMut<'lt, T>;
+    
     fn query_components_mut(world: &World, entity: EntityId) -> Option<Self::OutputMut<'_>> {
         world.get_component_mut::<T>(entity)
     }
-
 }
 
 #[macro_export]
