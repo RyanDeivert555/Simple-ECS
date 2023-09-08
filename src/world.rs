@@ -11,8 +11,8 @@ pub struct World {
     resources: ComponentMap,
 }
 
-// entity operations
 impl World {
+    // entity operations
     fn valid_entity(&self, entity: EntityId) -> bool {
         self.entities.valid_entity(entity)
     }
@@ -36,10 +36,8 @@ impl World {
     pub fn new_entities(&mut self, count: usize) -> impl Iterator<Item = EntityId> + '_ {
         self.entities.new_entities(count)
     }
-}
 
-// component operations
-impl World {
+    // component operations
     pub fn add_component<T: Component + 'static>(&mut self, entity: EntityId, component: T) {
         self.entities.add_component(entity, component);
     }
@@ -88,10 +86,8 @@ impl World {
             None
         }
     }
-}
 
-// query operations
-impl World {
+    // query operations
     pub fn query_components<Q: Query>(&self) -> impl Iterator<Item = <Q>::Output<'_>> {
         self.entities.entities().filter_map(|e| self.get_components::<Q>(e))
     }
@@ -107,10 +103,8 @@ impl World {
     pub fn query_single_mut<Q: Query>(&self) -> Option<<Q>::OutputMut<'_>> {
         self.query_components_mut::<Q>().next()
     }
-}
 
-// resource operations
-impl World {
+    // resource operations
     pub fn add_resource<T: Resource + 'static>(&mut self, resource: T) {
         let type_id = TypeId::of::<T>();
         assert!(
