@@ -1,9 +1,11 @@
 #![allow(dead_code)]
+use crate::commands::CommandQueue;
 use crate::components::{Component, Query};
 use crate::entities::{ComponentMap, Entities, EntityId};
 use crate::resources::Resource;
 use std::any::TypeId;
 use std::cell::{Ref, RefCell, RefMut};
+// RwLock: temporary mutability
 
 #[derive(Default)]
 pub struct World {
@@ -17,16 +19,16 @@ impl World {
         self.entities.valid_entity(entity)
     }
 
-    fn next_slot(&self) -> EntityId {
-        self.entities.next_slot()
-    }
-
     pub fn new_entity(&mut self) -> EntityId {
         self.entities.new_entity()
     }
 
     pub fn remove_entity(&mut self, entity: EntityId) {
         self.entities.remove_entity(entity);
+    }
+
+    pub fn remove_entities(&mut self, entities: impl Iterator<Item = EntityId>) {
+        self.entities.remove_entities(entities);
     }
 
     pub fn available_slots(&self) -> impl Iterator<Item = EntityId> + '_ {
@@ -46,6 +48,16 @@ impl World {
         self.entities.remove_component::<T>(entity);
     }
 
+    // command operations
+    pub fn run_commands(&mut self) {
+        let mut command_queue = {
+            let mut command_queue = self.get_resource_mut::<CommandQueue>().unwrap();
+            std::mem::take(&mut *command_queue) // deref coersion
+        }; //we drop the refmut here, so it can't interfere with the `&mut` borrow we take on the next line
+        command_queue.run_commands(self);
+    }
+
+    // query operations
     pub fn get_component<T: Component + 'static>(&self, entity: EntityId) -> Option<Ref<'_, T>> {
         Some(Ref::map(
             self.entities
@@ -87,7 +99,6 @@ impl World {
         }
     }
 
-    // query operations
     pub fn query_components<Q: Query>(&self) -> impl Iterator<Item = <Q>::Output<'_>> {
         self.entities.entities().filter_map(|e| self.get_components::<Q>(e))
     }
