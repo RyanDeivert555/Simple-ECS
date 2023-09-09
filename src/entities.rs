@@ -84,9 +84,10 @@ impl Entities {
             entity,
             self.max_slot
         );
-        if let Some(component_map) = self.entities[entity].as_mut() {
-            component_map.insert(TypeId::of::<T>(), RefCell::new(Box::new(component)));
-        }
+        self.entities[entity]
+            .as_mut()
+            .unwrap()
+            .insert(TypeId::of::<T>(), RefCell::new(Box::new(component)));
     }
 
     pub fn remove_component<T: Component + 'static>(&mut self, entity: EntityId) {
@@ -96,9 +97,10 @@ impl Entities {
             entity,
             self.max_slot
         );
-        if let Some(component_map) = self.entities[entity].as_mut() {
-            component_map.remove(&TypeId::of::<T>());
-        }
+        self.entities[entity]
+            .as_mut()
+            .unwrap()
+            .remove(&TypeId::of::<T>());
     }
 
     pub fn entities(&self) -> std::ops::Range<EntityId> {
