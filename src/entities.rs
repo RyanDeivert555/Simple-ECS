@@ -47,13 +47,24 @@ impl Entities {
     }
 
     pub fn remove_entity(&mut self, entity: EntityId) {
-        assert!(self.valid_entity(entity), "Invalid Entity Id: {}", entity);
+        // ok if an "invalid" entity is removed
+        assert!(
+            entity < self.max_slot,
+            "Invalid Entity Id: {}\nMax Slot: {}",
+            entity,
+            self.max_slot
+        );
         self.entities[entity] = None;
     }
 
     pub fn remove_entities(&mut self, entities: impl Iterator<Item = EntityId>) {
         for entity in entities {
-            assert!(self.valid_entity(entity), "Invalid Entity Id: {}", entity);
+            assert!(
+                self.valid_entity(entity),
+                "Invalid Entity Id: {}\nMax Slot: {}",
+                entity,
+                self.max_slot
+            );
             self.remove_entity(entity);
         }
     }
@@ -67,14 +78,24 @@ impl Entities {
     }
 
     pub fn add_component<T: Component + 'static>(&mut self, entity: EntityId, component: T) {
-        assert!(self.valid_entity(entity), "Invalid Entity Id: {}", entity);
+        assert!(
+            self.valid_entity(entity),
+            "Invalid Entity Id: {}\nMax Slot: {}",
+            entity,
+            self.max_slot
+        );
         if let Some(component_map) = self.entities[entity].as_mut() {
             component_map.insert(TypeId::of::<T>(), RefCell::new(Box::new(component)));
         }
     }
 
     pub fn remove_component<T: Component + 'static>(&mut self, entity: EntityId) {
-        assert!(self.valid_entity(entity), "Invalid Entity Id: {}", entity);
+        assert!(
+            self.valid_entity(entity),
+            "Invalid Entity Id: {}\nMax Slot: {}",
+            entity,
+            self.max_slot
+        );
         if let Some(component_map) = self.entities[entity].as_mut() {
             component_map.remove(&TypeId::of::<T>());
         }
@@ -85,7 +106,12 @@ impl Entities {
     }
 
     pub fn component_map(&self, entity: EntityId) -> Option<&ComponentMap> {
-        assert!(self.valid_entity(entity), "Invalid Entity Id: {}", entity);
+        assert!(
+            self.valid_entity(entity),
+            "Invalid Entity Id: {}\nMax Slot: {}",
+            entity,
+            self.max_slot
+        );
         self.entities[entity].as_ref()
     }
 }
