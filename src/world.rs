@@ -57,6 +57,10 @@ impl World {
         command_queue.run_commands(self);
     }
 
+    pub fn get_command_queue(&self) -> RefMut<'_, CommandQueue> {
+        self.get_resource_mut::<CommandQueue>().unwrap()
+    }
+
     // query operations
     pub fn get_component<T: Component + 'static>(&self, entity: EntityId) -> Option<Ref<'_, T>> {
         Some(Ref::map(
