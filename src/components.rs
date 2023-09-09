@@ -55,24 +55,18 @@ macro_rules! __impl_query {
     };
 }
 
-#[macro_export]
-macro_rules! __recurse_without_last_arg {
-    ($macro_name:ident [$($init_arg:ident),*] $last_arg:ident) => {
-        $macro_name!($($init_arg),*);
-    };
-    ($macro_name:ident [$($init_arg:ident),*] $not_last_arg:ident, $($tail_arg:ident),+) => {
-        __recurse_without_last_arg!($macro_name [$($init_arg,)* $not_last_arg] $($tail_arg),*);
-    };
-}
+__impl_query!(T1, T2);
+__impl_query!(T1, T2, T3);
+__impl_query!(T1, T2, T3, T4);
+__impl_query!(T1, T2, T3, T4, T5);
+__impl_query!(T1, T2, T3, T4, T5, T6);
+__impl_query!(T1, T2, T3, T4, T5, T6, T7);
+__impl_query!(T1, T2, T3, T4, T5, T6, T7, T8);
+__impl_query!(T1, T2, T3, T4, T5, T6, T7, T8, T9);
+__impl_query!(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10);
+__impl_query!(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11);
+__impl_query!(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12);
 
-#[macro_export]
-macro_rules! __impl_all_query {
-    () => {};
-    ($($generic_type:ident),*) => {
-        __recurse_without_last_arg!(__impl_all_query [] $($generic_type),*);
-        __impl_query!($($generic_type),*);
-    };
-}
 
 #[macro_export]
 macro_rules! register_components {
@@ -80,7 +74,6 @@ macro_rules! register_components {
         $(
             impl $crate::components::Component for $generic_type {}
         )*
-        __impl_all_query!($($generic_type),*);
     };
 }
 pub use register_components;
