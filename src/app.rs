@@ -18,12 +18,14 @@ impl App {
         }
     }
 
-    pub fn add_startup_system(&mut self, system: impl StartUpSystem + 'static) {
+    pub fn add_startup_system(&mut self, system: impl StartUpSystem + 'static) -> &mut Self {
         self.scheduler.add_startup_system(system);
+        self
     }
 
-    pub fn add_system(&mut self, system: impl System + 'static) {
+    pub fn add_system(&mut self, system: impl System + 'static) -> &mut Self {
         self.scheduler.add_system(system);
+        self
     }
 
     pub fn run(&mut self) {
