@@ -5,7 +5,6 @@ use crate::entities::{ComponentMap, Entities, EntityId};
 use crate::resources::Resource;
 use std::any::TypeId;
 use std::cell::{Ref, RefCell, RefMut};
-// RwLock: temporary mutability
 
 #[derive(Default)]
 pub struct World {
