@@ -1,15 +1,15 @@
 #![allow(dead_code)]
 use crate::commands::CommandQueue;
 use crate::components::{Component, Query};
-use crate::entities::{ComponentMap, Entities, EntityId};
-use crate::resources::Resource;
+use crate::entities::{Entities, EntityId};
+use crate::resources::{Resource, ResourcesMap};
 use std::any::TypeId;
-use std::cell::{Ref, RefCell, RefMut};
+use std::cell::{Ref, RefMut};
 
 #[derive(Default)]
 pub struct World {
     entities: Entities,
-    resources: ComponentMap,
+    resources: ResourcesMap,
 }
 
 impl World {
@@ -124,30 +124,18 @@ impl World {
 
     // resource operations
     pub fn add_resource<T: Resource + 'static>(&mut self, resource: T) {
-        let type_id = TypeId::of::<T>();
-        assert!(
-            !self.resources.contains_key(&type_id),
-            "Resource already added!"
-        );
-        self.resources
-            .insert(type_id, RefCell::new(Box::new(resource)));
+        self.resources.add_resource(resource);
     }
 
     pub fn remove_resource<T: Resource + 'static>(&mut self) {
-        self.resources.remove(&TypeId::of::<T>());
+        self.resources.remove_resource::<T>();
     }
 
     pub fn get_resource<T: Resource + 'static>(&self) -> Option<Ref<'_, T>> {
-        Some(Ref::map(
-            self.resources.get(&TypeId::of::<T>())?.borrow(),
-            |b| (**b).downcast_ref::<T>().unwrap(),
-        ))
+        self.resources.get_resource::<T>()
     }
 
     pub fn get_resource_mut<T: Resource + 'static>(&self) -> Option<RefMut<'_, T>> {
-        Some(RefMut::map(
-            self.resources.get(&TypeId::of::<T>())?.borrow_mut(),
-            |b| (**b).downcast_mut::<T>().unwrap(),
-        ))
+        self.resources.get_resource_mut::<T>()
     }
 }
