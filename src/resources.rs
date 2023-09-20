@@ -1,12 +1,12 @@
 use crate::entities::ComponentMap;
 use std::any::TypeId;
-use std::cell::{RefCell, Ref, RefMut};
+use std::cell::{Ref, RefCell, RefMut};
 
 pub trait Resource {}
 
 #[derive(Default)]
 pub struct ResourcesMap {
-    resources: ComponentMap
+    resources: ComponentMap,
 }
 
 impl ResourcesMap {

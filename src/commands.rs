@@ -17,7 +17,7 @@ impl CommandQueue {
     }
 
     pub fn run_commands(&mut self, world: &mut World) {
-        for mut command in self.commands.drain(..) {
+        for command in self.commands.iter_mut() {
             command(world);
         }
     }
