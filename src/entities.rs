@@ -59,12 +59,6 @@ impl Entities {
 
     pub fn remove_entities(&mut self, entities: impl Iterator<Item = EntityId>) {
         for entity in entities {
-            assert!(
-                self.valid_entity(entity),
-                "Invalid Entity Id: {}\nMax Slot: {}",
-                entity,
-                self.max_slot
-            );
             self.remove_entity(entity);
         }
     }
