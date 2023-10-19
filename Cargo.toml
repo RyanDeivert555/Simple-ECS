@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-raylib = "3.7.0"
+raylib = { version =  "3.7.0" }
 
 [profile.release]
 debug = true
