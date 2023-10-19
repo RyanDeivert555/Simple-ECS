@@ -7,6 +7,7 @@ use std::collections::HashMap;
 pub type EntityId = usize;
 pub type ComponentMap = HashMap<TypeId, RefCell<Box<dyn Any>>>;
 
+#[derive(Debug)]
 pub struct Entity(EntityId);
 impl Component for Entity {}
 

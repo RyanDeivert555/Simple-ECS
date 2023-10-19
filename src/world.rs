@@ -6,7 +6,7 @@ use crate::resources::{Resource, ResourcesMap};
 use std::any::TypeId;
 use std::cell::{Ref, RefMut};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct World {
     entities: Entities,
     resources: ResourcesMap,

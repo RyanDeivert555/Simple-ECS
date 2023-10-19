@@ -4,7 +4,7 @@ use std::cell::{Ref, RefCell, RefMut};
 
 pub trait Resource {}
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct ResourcesMap {
     resources: ComponentMap,
 }
