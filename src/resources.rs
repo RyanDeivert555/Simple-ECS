@@ -27,14 +27,14 @@ impl ResourcesMap {
     pub fn get_resource<T: Resource + 'static>(&self) -> Option<Ref<'_, T>> {
         Some(Ref::map(
             self.resources.get(&TypeId::of::<T>())?.borrow(),
-            |b| (**b).downcast_ref::<T>().unwrap(),
+            |b| b.downcast_ref::<T>().unwrap(),
         ))
     }
 
     pub fn get_resource_mut<T: Resource + 'static>(&self) -> Option<RefMut<'_, T>> {
         Some(RefMut::map(
             self.resources.get(&TypeId::of::<T>())?.borrow_mut(),
-            |b| (**b).downcast_mut::<T>().unwrap(),
+            |b| b.downcast_mut::<T>().unwrap(),
         ))
     }
 }

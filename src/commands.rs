@@ -16,6 +16,7 @@ impl CommandQueue {
     }
 
     pub fn run_commands(&mut self, world: &mut World) {
+        // no need to consume since we use std::take
         for command in self.commands.iter_mut() {
             command(world);
         }

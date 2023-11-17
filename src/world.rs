@@ -67,7 +67,7 @@ impl World {
                 .component_map(entity)?
                 .get(&TypeId::of::<T>())?
                 .borrow(),
-            |b| (**b).downcast_ref::<T>().unwrap(),
+            |b| b.downcast_ref::<T>().unwrap(),
         ))
     }
 
@@ -80,7 +80,7 @@ impl World {
                 .component_map(entity)?
                 .get(&TypeId::of::<T>())?
                 .borrow_mut(),
-            |b| (**b).downcast_mut::<T>().unwrap(),
+            |b| b.downcast_mut::<T>().unwrap(),
         ))
     }
 
