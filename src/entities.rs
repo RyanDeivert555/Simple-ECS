@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use crate::components::Component;
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
@@ -12,6 +11,7 @@ pub struct Entity(EntityId);
 impl Component for Entity {}
 
 impl Entity {
+    #[allow(dead_code)]
     pub fn id(&self) -> EntityId {
         self.0
     }

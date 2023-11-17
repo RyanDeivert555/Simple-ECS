@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use crate::resources::Resource;
 use crate::world::World;
 
